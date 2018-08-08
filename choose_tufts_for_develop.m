@@ -68,13 +68,13 @@ function choose_tufts_for_develop_OpeningFcn(hObject, ~, ...
 % hold off
 
 handles.bw=bw;
-handles.CroppedMask=CroppedMask
+handles.CroppedMask=CroppedMask;
 handles.xcenter=xcenter;
 handles.ycenter=ycenter;
 handles.graindata=graindata;
 handles.weightVector=weightVector;
 handles.trainingmat=trainingmat;
-global MLhandel
+global MLhandel;
 if isfield(MLhandel,'selectedFeatures')
     handles.x_location_box.Value=MLhandel.selectedFeatures(1);
     handles.y_location_box.Value=MLhandel.selectedFeatures(2);
@@ -86,7 +86,7 @@ if isfield(MLhandel,'selectedFeatures')
 else
     MLhandel.selectedFeatures=[0,0,1,1,1,1,1];
 end
-updateImagebutton_Callback(hObject, 1, handles)
+updateImagebutton_Callback(hObject, 1, handles);
 % Choose default command line output for choose_tufts_for_develop
 handles.output = hObject;
 
@@ -421,7 +421,7 @@ function updateImagebutton_Callback(hObject, eventdata, handles)
 f = uifigure;
 d = uiprogressdlg(f,'Title','Computing',...
     'Indeterminate','on');
-global MLhandel
+global MLhandel;
 counter=1;
 for i=1:length(MLhandel.selectedFeatures)
     if MLhandel.selectedFeatures(i)==1
@@ -453,7 +453,7 @@ contourf(Q,[0:0.01:1],'LineStyle','none');
 axis equal
 
 axes(handles.Image);
-imagesc(flipud(handles.bw))
+imagesc(flipud(handles.bw));
 alpha 0.2
 hold off
 close(f);

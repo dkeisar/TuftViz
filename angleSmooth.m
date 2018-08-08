@@ -1,6 +1,9 @@
 function edgeangle = angleSmooth(edgeangle,Cent,WindAngle)
 %function smoothen the data based on the tufts above it
+%Wind angle must come here in angles not in rads
+
 %Cent(:,2)=max(Cent(:,2))-Cent(:,2);
+
 if (WindAngle>=0 && WindAngle<45) || (WindAngle>315 && WindAngle<=360)
     [sortcent,indd]=sortrows(Cent,1,'ascend');%sortcent=A(indd,:)
 elseif (WindAngle>=45 && WindAngle<135)
@@ -24,6 +27,7 @@ for i=1:length(sortcent)
             (angleToTheTuft>=WindAngle+360-60 && angleToTheTuft<=WindAngle+360+60)
             tuftbef(counter,:)=Cent(j,:);
             tuftbefedgeangle(counter)=edgeangle(j);
+            counter=counter+1;
         end
     end
     try [D,in]=pdist2([tuftbef(:,1),tuftbef(:,2)]...
@@ -33,15 +37,24 @@ for i=1:length(sortcent)
     try tuftBefMat(1)=tuftbefedgeangle(in(1));
     end
     try tuftBefMat(2)=tuftbefedgeangle(in(2));
+        number2=1;% see ifthere is seconed neighboor for the mean part below
     end
     try meanAboveAngle=mean(tuftBefMat);
     end
-    try if abs(sortedgeangle(i)-meanAboveAngle)>45
-            sortedgeangle(i)=mean(meanAboveAngle,meanAboveAngle,sortedgeangle(i));
+    try if abs(sortedgeangle(i)-meanAboveAngle)>45 
+            if exist('number2') && abs(tuftBefMat(2)-tuftBefMat(1))>60
+                if abs(sortedgeangle(i)-tuftBefMat(1))>abs(sortedgeangle(i)-tuftBefMat(2))
+                    sortedgeangle(i)=mean([tuftBefMat(2),sortedgeangle(i)]);
+                else
+                    sortedgeangle(i)=mean([tuftBefMat(1),sortedgeangle(i)]);
+                end
+            else
+                sortedgeangle(i)=mean([meanAboveAngle,meanAboveAngle,sortedgeangle(i)]);
+            end
         end
     end
-    
-    try clear ('tuftbef','meanAboveAngle')
+    try clear ('tuftbef','meanAboveAngle','tuftBefMat','in','tuftbefedgeangle');
+        clear ('number2');
     end
 end
 

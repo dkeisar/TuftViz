@@ -7,6 +7,7 @@ WindAngle=imageTune.FlowAngle;
 %% choose rand image then segment and tune it
     [bw,labeled,I] = segmentrandframe(imageTune);
 %% create tuft set
+WindAngle=deg2rad(WindAngle);
 [trainingSet]=create_tuft_set(labeled,bw,WindAngle);
 
 %%
@@ -26,8 +27,14 @@ end
 
 trainingmat = lh.calculateBeliefPropagation(trainingmat, firstPrediction,windangles);
 
-[tuftSet,Orientation]=create_develop(labeled,bw,...
-    WindAngle,trainingmat,weightVector,imageTune.CropFrame,I);
+%[tuftSet]=create_develop(labeled,bw,...
+%    WindAngle,trainingmat,weightVector,imageTune.CropFrame,I);
+[tuftSet,xcenter,ycenter,graindata]=create_tuft_set(labeled,bw,WindAngle);
+
+choose_tufts_for_develop(bw,xcenter,ycenter,graindata,trainingmat,weightVector,imageTune.CroppedMask,I)
+    uiwait (gcf)
+
+
 global val;
 val=[];
 try
@@ -48,10 +55,7 @@ end
 %     tuftSet(i).windRelatedAngle=deg2rad((WindAngle-...
 %         Orientation(i).Orientation));
 % end
-for i=1:length(Orientation)
-    tuftSet(i).windRelatedAngle=deg2rad((WindAngle-...
-        Orientation(i).Orientation));
-end
+
 % this func should start BP and get back the train matrix
 if exist('tuftLabel')
     [weightVector,~,miniweightVector] =lh.process(tuftSet,tuftLabel,weightVector,miniweightVector);
