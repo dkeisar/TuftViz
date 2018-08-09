@@ -38,28 +38,22 @@ classdef LearningHandler
         function [trainingSet,windangles] = buildTrainingSet(~, data)
             trainingSet = zeros(length(data), 10);
             for i=1:length(data)
-                try trainingSet(i,1) = data(i).pixelX;
                 try 
                     trainingSet(i,1) = data(i).pixelX;
                 end
-                try trainingSet(i,2) = data(i).pixelY;
                 try 
                     trainingSet(i,2) = data(i).pixelY;
                 end
-                try trainingSet(i,3) = abs(cos(data(i).windRelatedAngle));
                 try 
                     trainingSet(i,3) = abs(cos(data(i).windRelatedAngle));
                     windangles(i)=data(i).windRelatedAngle;
                 end
-                try trainingSet(i,4) = data(i).straightness;
                 try 
                     trainingSet(i,4) = data(i).straightness;
                 end
-                try trainingSet(i,5) = abs(cos(data(i).edgeRelatedrealAngle));
                 try 
                     trainingSet(i,5) = data(i).edgeRelatedAngle;
                 end
-                try trainingSet(i,6) = data(i).length;
                 try 
                     trainingSet(i,6) = data(i).length;
                 end
