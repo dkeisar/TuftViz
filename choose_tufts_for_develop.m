@@ -60,21 +60,21 @@ function choose_tufts_for_develop_OpeningFcn(hObject, ~, ...
 % hold on
 % contourf(Q,[0:0.01:1],'LineStyle','none');
 % axis equal
-% 
+%
 % axes(handles.Image);
-% 
+%
 % imagesc(flipud(bw))
 % alpha 0.2
 % hold off
 
 handles.bw=bw;
-handles.CroppedMask=CroppedMask
+handles.CroppedMask=CroppedMask;
 handles.xcenter=xcenter;
-handles.ycenter=ycenter;
+handles.ycenter=(size(bw,1)-ycenter);
 handles.graindata=graindata;
 handles.weightVector=weightVector;
 handles.trainingmat=trainingmat;
-global MLhandel
+global MLhandel;
 if isfield(MLhandel,'selectedFeatures')
     handles.x_location_box.Value=MLhandel.selectedFeatures(1);
     handles.y_location_box.Value=MLhandel.selectedFeatures(2);
@@ -86,7 +86,7 @@ if isfield(MLhandel,'selectedFeatures')
 else
     MLhandel.selectedFeatures=[0,0,1,1,1,1,1];
 end
-updateImagebutton_Callback(hObject, 1, handles)
+updateImagebutton_Callback(hObject, 1, handles);
 % Choose default command line output for choose_tufts_for_develop
 handles.output = hObject;
 
@@ -124,20 +124,24 @@ for i=1:length(handles.xcenter)
     if ~h(round(handles.ycenter(i)),round(handles.xcenter(i)))
         if isfield(val,'x')
             val.x=[val.x,handles.xcenter(i)];
-            val.y=[val.y,handles.ycenter(i)];
+            val.y=[val.y,size(handles.bw,1)-handles.ycenter(i)];
             val.label=[val.label,0];
             val.box=[val.box;handles.graindata(i).BoundingBox];
-            rect=imrect(gca,handles.graindata(i).BoundingBox);
+            rectan=[handles.graindata(i).BoundingBox];
+            rectan(2)=size(handles.bw,1)-rectan(2)-rectan(4)         ;
+            rect=imrect(gca,rectan);
             setColor(rect,'Red');
             val.tufts(length(val.x))=i;
             counter=counter+1;
         else
             val.x=handles.xcenter(i);
-            val.y=handles.ycenter(i);
+            val.y=size(handles.bw,1)-handles.ycenter(i);
             val.label=0;
             val.tufts=i;
             val.box=handles.graindata(i).BoundingBox;
-            rect=imrect(gca,handles.graindata(i).BoundingBox);
+            rectan=[handles.graindata(i).BoundingBox];
+            rectan(2)=size(handles.bw,1)-rectan(2)-rectan(4)         ;
+            rect=imrect(gca,rectan);
             setColor(rect,'Red');
             counter=counter+1;
         end
@@ -161,11 +165,13 @@ for i=1:length(x_point)
             [~,index]=min(pdist2([x_point(i) y_point(i)]...
                 ,[handles.xcenter handles.ycenter]));
             val.x=[val.x,handles.xcenter(index)];
-            val.y=[val.y,handles.ycenter(index)];
+            val.y=[val.y,size(handles.bw,1)-handles.ycenter(index)];
             val.label=[val.label,0];
             val.tufts(length(val.x))=index;
             val.box=[val.box;handles.graindata(index).BoundingBox];
-            rect=imrect(gca,handles.graindata(index).BoundingBox);
+            rectan=[handles.graindata(index).BoundingBox];
+            rectan(2)=size(handles.bw,1)-rectan(2)-rectan(4)         ;
+            rect=imrect(gca,rectan);
             setColor(rect,'Red');
         end
     else
@@ -173,11 +179,13 @@ for i=1:length(x_point)
         [~,index]=min(pdist2([x_point(i) y_point(i)]...
             ,[handles.xcenter handles.ycenter]));
         val.x=handles.xcenter(index);
-        val.y=handles.ycenter(index);
+        val.y=size(handles.bw,1)-handles.ycenter(index);
         val.label=0;
         val.tufts=index;
         val.box=handles.graindata(index).BoundingBox;
-        rect=imrect(gca,handles.graindata(index).BoundingBox);
+        rectan=[handles.graindata(index).BoundingBox];
+        rectan(2)=size(handles.bw,1)-rectan(2)-rectan(4)         ;
+        rect=imrect(gca,rectan);
         setColor(rect,'Red');
     end
     
@@ -203,12 +211,14 @@ for i=1:length(x_point)
             [~,index]=min(pdist2([x_point(i) y_point(i)]...
                 ,[handles.xcenter handles.ycenter]));
             val.x=[val.x,handles.xcenter(index)];
-            val.y=[val.y,handles.ycenter(index)];
+            val.y=[val.y,size(handles.bw,1)-handles.ycenter(index)];
             val.label=[val.label,1];
             
             val.tufts(length(val.x))=index;
             val.box=[val.box;handles.graindata(index).BoundingBox];
-            rect=imrect(gca,handles.graindata(index).BoundingBox);
+            rectan=[handles.graindata(index).BoundingBox];
+            rectan(2)=size(handles.bw,1)-rectan(2)-rectan(4)         ;
+            rect=imrect(gca,rectan);
             setColor(rect,'Blue');
         end
     else
@@ -216,11 +226,13 @@ for i=1:length(x_point)
         [~,index]=min(pdist2([x_point(i) y_point(i)]...
             ,[handles.xcenter handles.ycenter]));
         val.x=handles.xcenter(index);
-        val.y=handles.ycenter(index);
+        val.y=size(handles.bw,1)-handles.ycenter(index);
         val.label=1;
         val.tufts=index;
         val.box=handles.graindata(index).BoundingBox;
-        rect=imrect(gca,handles.graindata(index).BoundingBox);
+        rectan=[handles.graindata(index).BoundingBox];
+        rectan(2)=size(handles.bw,1)-rectan(2)-rectan(4)         ;
+        rect=imrect(gca,rectan);
         setColor(rect,'Blue');
     end
     
@@ -244,19 +256,24 @@ for i=1:length(handles.xcenter)
     if ~h(round(handles.ycenter(i)),round(handles.xcenter(i)))
         if isfield(val,'x')
             val.x=[val.x,handles.xcenter(i)];
-            val.y=[val.y,handles.ycenter(i)];
+            val.y=[val.y,size(handles.bw,1)-handles.ycenter(i)];
             val.label=[val.label,1];
             val.box=[val.box;handles.graindata(i).BoundingBox];
-            rect=imrect(gca,handles.graindata(i).BoundingBox);
+            rectan=[handles.graindata(i).BoundingBox];
+            rectan(2)=size(handles.bw,1)-rectan(2)-rectan(4)         ;
+            rect=imrect(gca,rectan);
             setColor(rect,'Blue');
             val.tufts(length(val.x))=i;
         else
             val.x=handles.xcenter(i);
-            val.y=handles.ycenter(i);
+            val.y=size(handles.bw,1)-handles.ycenter(i);
             val.label=1;
             val.box=handles.graindata(i).BoundingBox;
             val.tufts=i;
-            imrect(gca,handles.graindata(i).BoundingBox);
+            rectan=[handles.graindata(i).BoundingBox];
+            rectan(2)=size(handles.bw,1)-rectan(2)-rectan(4)         ;
+            rect=imrect(gca,rectan);
+            setColor(rect,'Blue');
         end
     end
 end
@@ -290,12 +307,14 @@ for i=1:length(x_point)
             [~,index]=min(pdist2([x_point(i) y_point(i)]...
                 ,[handles.xcenter handles.ycenter]));
             val.x=[val.x,handles.xcenter(index)];
-            val.y=[val.y,handles.ycenter(index)];
+            val.y=[val.y,size(handles.bw,1)-handles.ycenter(index)];
             val.label=[val.label,0.5];
             
             val.tufts(length(val.x))=index;
             val.box=[val.box;handles.graindata(index).BoundingBox];
-            rect=imrect(gca,handles.graindata(index).BoundingBox);
+            rectan=[handles.graindata(index).BoundingBox];
+            rectan(2)=size(handles.bw,1)-rectan(2)-rectan(4)         -rectan(4);
+            rect=imrect(gca,rectan);
             setColor(rect,'Green');
         end
     else
@@ -303,11 +322,13 @@ for i=1:length(x_point)
         [~,index]=min(pdist2([x_point(i) y_point(i)]...
             ,[handles.xcenter handles.ycenter]));
         val.x=handles.xcenter(index);
-        val.y=handles.ycenter(index);
+        val.y=size(handles.bw,1)-handles.ycenter(index);
         val.label=0.5;
         val.tufts=index;
         val.box=handles.graindata(index).BoundingBox;
-        rect=imrect(gca,handles.graindata(index).BoundingBox);
+        rectan=[handles.graindata(index).BoundingBox];
+        rectan(2)=size(handles.bw,1)-rectan(2)-rectan(4)         -rectan(4);
+        rect=imrect(gca,rectan);
         setColor(rect,'Green');
     end
     
@@ -327,19 +348,23 @@ for i=1:length(handles.xcenter)
     if ~h(round(handles.ycenter(i)),round(handles.xcenter(i)))
         if isfield(val,'x')
             val.x=[val.x,handles.xcenter(i)];
-            val.y=[val.y,handles.ycenter(i)];
+            val.y=[val.y,size(handles.bw,1)-handles.ycenter(i)];
             val.label=[val.label,0.5];
             val.box=[val.box;handles.graindata(i).BoundingBox];
-            rect=imrect(gca,handles.graindata(i).BoundingBox);
+            rectan=[handles.graindata(i).BoundingBox];
+            rectan(2)=size(handles.bw,1)-rectan(2)-rectan(4)         ;
+            rect=imrect(gca,rectan);
             setColor(rect,'Green');
             val.tufts(length(val.x))=i;
         else
             val.x=handles.xcenter(i);
-            val.y=handles.ycenter(i);
+            val.y=size(handles.bw,1)-handles.ycenter(i);
             val.label=0.5;
             val.box=handles.graindata(i).BoundingBox;
             val.tufts=i;
-            imrect(gca,handles.graindata(i).BoundingBox);
+            rectan=[handles.graindata(i).BoundingBox];
+            rectan(2)=size(handles.bw,1)-rectan(2)-rectan(4)         ;
+            rect=imrect(gca,rectan);
             setColor(rect,'Green');
         end
     end
@@ -421,7 +446,7 @@ function updateImagebutton_Callback(hObject, eventdata, handles)
 f = uifigure;
 d = uiprogressdlg(f,'Title','Computing',...
     'Indeterminate','on');
-global MLhandel
+global MLhandel;
 counter=1;
 for i=1:length(MLhandel.selectedFeatures)
     if MLhandel.selectedFeatures(i)==1
@@ -431,7 +456,7 @@ for i=1:length(MLhandel.selectedFeatures)
 end
 updatedWeightVector = fmin_adam(@(weightVector)labelingMSEGradients...
     (weightVector, MLhandel.tuftVectors(:,selectedFeaturevector), MLhandel.labels(:,2)), ...
-    	handles.weightVector(:,selectedFeaturevector)', 0.01);
+    handles.weightVector(:,selectedFeaturevector)', 0.01);
 updatedWeightVector=updatedWeightVector';
 counter=1;
 for i=1:length(MLhandel.selectedFeatures)
@@ -443,17 +468,18 @@ for i=1:length(MLhandel.selectedFeatures)
     end
 end
 uupdatedWeightVector(i+1:i+3)=0;
-[Q] = contourmap_drawer_ML(uupdatedWeightVector,handles.trainingmat...
-    ,handles.CroppedMask,handles.bw,1);
+tuftLabels=handles.trainingmat*(uupdatedWeightVector');
+    [Q] = contourmap_drawer_ML(handles.trainingmat,tuftLabels...
+        ,handles.CroppedMask,handles.bw,1);
 MLhandel.WeightVector=uupdatedWeightVector;
 
 axes(handles.Image);
 hold on
-contourf(Q,[0:0.01:1],'LineStyle','none');
+contourf(Q,[0:0.1:1],'LineStyle','none');
 axis equal
 
 axes(handles.Image);
-imagesc(flipud(handles.bw))
+imagesc(flipud(handles.bw));
 alpha 0.2
 hold off
 close(f);

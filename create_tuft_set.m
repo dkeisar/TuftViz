@@ -23,6 +23,7 @@ for i=1:length(xcenter)
     Length(i)=MajorAxisLength(i).MajorAxisLength;
 end
 maxLength=max(Length);
+WindAngle=rad2deg(WindAngle);
 for i=1:length(xcenter)
     trainingSet(i).pixelX=xcenter(i)/l; trainingSet(i).pixelY=ycenter(i)/h;
     trainingSet(i).straightness=(1-MinorAxisLength(i).MinorAxisLength...
@@ -33,11 +34,10 @@ for i=1:length(xcenter)
     [Cent(i,1:2),edgeangle(i)] = edgeangleCalculation(trainingSet,pixellist,Centroid...
         ,MajorAxisLength,Orientations,WindAngle,i);
     
-    trainingSet(i).edgeRelatedrealAngle=edgeangle(i);
-    
-    trainingSet(i).edgeRelatedAngle=abs(cos(deg2rad(WindAngle-trainingSet(i).edgeRelatedrealAngle)));
+    %     trainingSet(i).edgeRelatedrealAngle=edgeangle(i);
+    %
+    %     trainingSet(i).edgeRelatedAngle=abs(cos(deg2rad(WindAngle-trainingSet(i).edgeRelatedrealAngle)));
 end
-
 edgeangle = angleSmooth(edgeangle,Cent,WindAngle);
 
 for i=1:length(xcenter)
@@ -45,34 +45,41 @@ for i=1:length(xcenter)
     
     trainingSet(i).edgeRelatedAngle=abs(cos(deg2rad(WindAngle-trainingSet(i).edgeRelatedrealAngle)));
 end
-
-
-Min_Dis_1=Inf;Min_Dis_2=Inf;Min_Dis_3=Inf;Min_Dis_4=Inf;
-for i=1:length(xcenter)
-    for j=1:length(xcenter)
-        if i~=j
-            Dis=pdist2([xcenter(i) ycenter(i)],[xcenter(j) ycenter(j)]);
-            if Dis<Min_Dis_1
-                Min_Dis_1=Dis;
-                trainingSet(i).neighbor_1=j;
-            elseif Dis<Min_Dis_2
-                Min_Dis_2=Dis;
-                trainingSet(i).neighbor_2=j;
-            elseif Dis<Min_Dis_3
-                Min_Dis_3=Dis;
-                trainingSet(i).neighbor_3=j;
-            elseif Dis<Min_Dis_4
-                Min_Dis_4=Dis;
-                trainingSet(i).neighbor_4=j;
-            end
-        end
-    end
-    Min_Dis_1=Inf;Min_Dis_2=Inf;Min_Dis_3=Inf;Min_Dis_4=Inf;
-end
 for i=1:length(Orientations)
     trainingSet(i).windRelatedAngle=deg2rad((WindAngle-...
         Orientations(i).Orientation));
 end
+neighboor = upwind_neighbours(Cent,WindAngle);
+for i=1:length(xcenter)
+    trainingSet(i).neighbor_1=neighboor(i,1);
+    trainingSet(i).neighbor_2=neighboor(i,2);
+    trainingSet(i).neighbor_3=neighboor(i,3);
+    trainingSet(i).neighbor_4=neighboor(i,4);
+end
+
+% Min_Dis_1=Inf;Min_Dis_2=Inf;Min_Dis_3=Inf;Min_Dis_4=Inf;
+% for i=1:length(xcenter)
+%     for j=1:length(xcenter)
+%         if i~=j
+%             Dis=pdist2([xcenter(i) ycenter(i)],[xcenter(j) ycenter(j)]);
+%             if Dis<Min_Dis_1
+%                 Min_Dis_1=Dis;
+%                 trainingSet(i).neighbor_1=j;
+%             elseif Dis<Min_Dis_2
+%                 Min_Dis_2=Dis;
+%                 trainingSet(i).neighbor_2=j;
+%             elseif Dis<Min_Dis_3
+%                 Min_Dis_3=Dis;
+%                 trainingSet(i).neighbor_3=j;
+%             elseif Dis<Min_Dis_4
+%                 Min_Dis_4=Dis;
+%                 trainingSet(i).neighbor_4=j;
+%             end
+%         end
+%     end
+%     Min_Dis_1=Inf;Min_Dis_2=Inf;Min_Dis_3=Inf;Min_Dis_4=Inf;
+% end
+
 % image= regionprops(labeled,'Image');
 %% calculate angle of the second half of the tuft
 % for i=1:length(xcenter)

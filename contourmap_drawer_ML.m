@@ -1,4 +1,4 @@
-function [Q] = contourmap_drawer_ML(weightVector,tuftMat,CroppedMask,I,dontplot)
+function [Q] = contourmap_drawer_ML(tuftMat,Lables,CroppedMask,I,dontplot)
 %%
 % This function gets data on the labled tuft, and draws probability map of
 % whether the flow is attached or not only by the orientation of the tuft
@@ -13,7 +13,7 @@ function [Q] = contourmap_drawer_ML(weightVector,tuftMat,CroppedMask,I,dontplot)
 %%
 % This part classifies the labled data to x,y vectors
 
-Lables=tuftMat*(weightVector');
+
 len=length(Lables);
 x=zeros(len,1);y=zeros(len,1); %initialize
 [h,l]=size(I);
@@ -37,21 +37,21 @@ Q = griddata(x,y,Lables,X,Y,'v4');
 % Q = Q(X,Y);
 
 %% Filters
-% if min(min(Q))<0
-%     Q=Q-min(min(Q));
-% end
-% if max(max(Q))>1
-%     Q=Q/max(max(Q)); 
-% end
-% Q=Q.^2; %inensefy the image -<shold be chossen by the user
-% 
-% 
-% if min(min(Q))<0
-%     Q=Q-min(min(Q));
-% end
-% if max(max(Q))>1
-%     Q=Q/max(max(Q)); 
-% end
+if min(min(Q))<0
+    Q=Q-min(min(Q));
+end
+if max(max(Q))>1
+    Q=Q/max(max(Q)); 
+end
+Q=Q.^3; %inensefy the image -<shold be chossen by the user
+
+
+if min(min(Q))<0
+    Q=Q-min(min(Q));
+end
+if max(max(Q))>1
+    Q=Q/max(max(Q)); 
+end
 %Q= filter2([ 1 0],Q,'full')
 windowSize = round(min(h,l)/8);
 b = (1/windowSize)*ones(1,windowSize);
