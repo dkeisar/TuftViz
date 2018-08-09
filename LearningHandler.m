@@ -6,7 +6,7 @@ classdef LearningHandler
             fprintf ("learning handler initialized\n");
         end
         
-        function [uupdatedWeightVector,filteredTrainingSet,miniweightVector] = process(this, tufts,...
+        function [updatedWeightVector,filteredTrainingSet,miniweightVector] = process(this, tufts,...
                 labels, weightVector,miniweightVector)
             fprintf ("recieved new array of tufts of length %d\n", length(tufts));
             fprintf ("Now let's learn\n");
@@ -14,7 +14,7 @@ classdef LearningHandler
             [firstPrediction,miniweightVector] = this.firstGuess(trainingSet, miniweightVector,labels);
             algoGuess = this.calculateBeliefPropagation(trainingSet, firstPrediction,windangles);
             filteredTrainingSet = this.filterLabeledOnly(algoGuess, labels);
-            uupdatedWeightVector= gradientOfVector(filteredTrainingSet,labels,weightVector,trainingSet);
+            updatedWeightVector= this.gradientOfVector(filteredTrainingSet,labels,weightVector,trainingSet);
         end
         
         function [predictions,updatedminiweightVector]= firstGuess(~, trainingSet, miniweightVector,labels)
@@ -85,7 +85,7 @@ classdef LearningHandler
             end
         end
         
-        function uupdatedWeightVector= gradientOfVector(~,filteredTrainingSet,labels,weightVector,trainingSet)
+        function updatedWeightVector= gradientOfVector(~,filteredTrainingSet,labels,weightVector,trainingSet)
             sz = size(trainingSet);
             global MLhandel
             if isfield(MLhandel,'labels')
@@ -113,13 +113,13 @@ classdef LearningHandler
                 counter=1;
                 for i=1:length(MLhandel.selectedFeatures)
                     if selecedFeatures(i)==1
-                        uupdatedWeightVector(i)=updatedWeightVector(counter);
+                        updatedWeightVector(i)=updatedWeightVector(counter);
                         counter=counter+1;
                     else
-                        uupdatedWeightVector(i)=0;
+                        updatedWeightVector(i)=0;
                     end
                 end
-                uupdatedWeightVector(i+1:i+3)=0;
+                updatedWeightVector(i+1:i+3)=0;
             end
         end
     end
