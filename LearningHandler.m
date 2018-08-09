@@ -39,22 +39,34 @@ classdef LearningHandler
             for i=1:length(data)
                 try 
                     trainingSet(i,1) = data(i).pixelX;
+                catch
+                    trainingSet(i,1) = 0;
                 end
                 try 
                     trainingSet(i,2) = data(i).pixelY;
+                catch
+                    trainingSet(i,2) = 0;
                 end
                 try 
                     trainingSet(i,3) = abs(cos(data(i).windRelatedAngle));
                     windangles(i)=data(i).windRelatedAngle;
+                catch
+                    trainingSet(i,3) = 0;
                 end
                 try 
                     trainingSet(i,4) = data(i).straightness;
+                catch
+                    trainingSet(i,4) = 0;
                 end
                 try 
                     trainingSet(i,5) = data(i).edgeRelatedAngle;
+                catch
+                    trainingSet(i,5) = 0;
                 end
                 try 
                     trainingSet(i,6) = data(i).length;
+                catch
+                        trainingSet(i,6) = 0;
                 end
                 try trainingSet(i,7) = data(i).neighbor_1;
                 catch
