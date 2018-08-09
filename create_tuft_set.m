@@ -45,7 +45,10 @@ for i=1:length(xcenter)
     
     trainingSet(i).edgeRelatedAngle=abs(cos(deg2rad(WindAngle-trainingSet(i).edgeRelatedrealAngle)));
 end
-
+for i=1:length(Orientations)
+    trainingSet(i).windRelatedAngle=deg2rad((WindAngle-...
+        Orientations(i).Orientation));
+end
 neighboor = upwind_neighbours(Cent,WindAngle);
 for i=1:length(xcenter)
     trainingSet(i).neighbor_1=neighboor(i,1);
@@ -76,10 +79,7 @@ end
 %     end
 %     Min_Dis_1=Inf;Min_Dis_2=Inf;Min_Dis_3=Inf;Min_Dis_4=Inf;
 % end
-for i=1:length(Orientations)
-    trainingSet(i).windRelatedAngle=deg2rad((WindAngle-...
-        Orientations(i).Orientation));
-end
+
 % image= regionprops(labeled,'Image');
 %% calculate angle of the second half of the tuft
 % for i=1:length(xcenter)

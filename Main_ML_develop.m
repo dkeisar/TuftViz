@@ -11,10 +11,18 @@ WindAngle=deg2rad(WindAngle);
 [trainingSet]=create_tuft_set(labeled,bw,WindAngle);
 
 %%
-meanweightVector=mean(weightVectors);
-meanminiweightVector=mean(miniweightVectors);
-weightVector=meanweightVector;
-miniweightVector=meanminiweightVector;
+if size(weightVectors,1)>1
+    meanweightVector=mean(weightVectors);
+    weightVector=meanweightVector;
+else
+    weightVector=weightVectors;
+end
+if size(miniweightVectors,1)>1
+    meanminiweightVector=mean(miniweightVectors);
+    miniweightVector=meanminiweightVector;
+else
+    miniweightVector=miniweightVectors;
+end
 
 lh=LearningHandler;
 [trainingmat,windangles] = lh.buildTrainingSet(trainingSet);

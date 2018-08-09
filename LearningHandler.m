@@ -51,7 +51,7 @@ classdef LearningHandler
                     trainingSet(i,4) = data(i).straightness;
                 end
                 try 
-                    trainingSet(i,5) = data(i).edgeRelatedrealAngle;
+                    trainingSet(i,5) = data(i).edgeRelatedAngle;
                 end
                 try 
                     trainingSet(i,6) = data(i).length;
