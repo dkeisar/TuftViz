@@ -1,4 +1,4 @@
-function calcCluster(trainingSet,h,l, maxClusters, labelDistanceFactor, useUnsupervised)
+function [labeledTufts] = calcCluster(trainingSet,h,l, maxClusters, labelDistanceFactor, useUnsupervised)
     addpath(genpath("PRML-PRMLT-v1.7-1-g3f9d968"));
     %method = 'Distance';
     %subMethod = 'euclidean';
@@ -13,11 +13,12 @@ function calcCluster(trainingSet,h,l, maxClusters, labelDistanceFactor, useUnsup
     end
     clusterSet = [trainingSet(:,1:2), reduceSet*labelDistanceFactor];
     [~, model, ~] = mixGaussEm(clusterSet, maxClust);
-    [label, ~] = mixGaussPred(clusterSet, model);
+    [labels, ~] = mixGaussPred(clusterSet, model);
+    labeledTufts = labels;
     flipped = trainingSet;
     flipped(:,2) = 1 - trainingSet(:,2);
     figure(maxClust);
-    scatter(flipped(:,1)*l,flipped(:,2)*h,10,label);
+    scatter(flipped(:,1)*l,flipped(:,2)*h,10,labels);
     axis equal
     
     if(maxClusters <= 10)

@@ -18,7 +18,7 @@ WindAngle=imageTune.FlowAngle;
     %clusterGrid=[];
     
     labelDistanceFactor = 4;
-    labeledTufts = calcCluster(trainingSet,h,l, MLhandel.noMaxClusters, labelDistanceFactor, useUnsupervised);
+    [labeledTufts] = calcCluster(trainingSet,h,l, MLhandel.noMaxClusters, labelDistanceFactor, useUnsupervised);
     
     %%
     
