@@ -2,6 +2,7 @@ classdef LearningHandler
     properties
     end
     methods
+    methods (Access = public)
         function this = LearningHandler()
             fprintf ("learning handler initialized\n");
         end
@@ -38,25 +39,45 @@ classdef LearningHandler
             trainingSet = zeros(length(data), 10);
             for i=1:length(data)
                 try trainingSet(i,1) = data(i).pixelX;
+                try 
+                    trainingSet(i,1) = data(i).pixelX;
                 end
                 try trainingSet(i,2) = data(i).pixelY;
+                try 
+                    trainingSet(i,2) = data(i).pixelY;
                 end
                 try trainingSet(i,3) = abs(cos(data(i).windRelatedAngle));
+                try 
+                    trainingSet(i,3) = abs(cos(data(i).windRelatedAngle));
                     windangles(i)=data(i).windRelatedAngle;
                 end
                 try trainingSet(i,4) = data(i).straightness;
+                try 
+                    trainingSet(i,4) = data(i).straightness;
                 end
                 try trainingSet(i,5) = abs(cos(data(i).edgeRelatedrealAngle));
+                try 
+                    trainingSet(i,5) = data(i).edgeRelatedAngle;
                 end
                 try trainingSet(i,6) = data(i).length;
+                try 
+                    trainingSet(i,6) = data(i).length;
                 end
                 try trainingSet(i,7) = data(i).neighbor_1;
+                catch
+                        trainingSet(i,8) = 0;
                 end
                 try trainingSet(i,8) = data(i).neighbor_2;
+                catch
+                        trainingSet(i,8) = 0;
                 end
                 try trainingSet(i,9) = data(i).neighbor_3;
+                catch
+                        trainingSet(i,9) = 0;
                 end
                 try trainingSet(i,10) = data(i).neighbor_4;
+                catch
+                        trainingSet(i,10) = 0;
                 end
             end
         end
@@ -67,8 +88,16 @@ classdef LearningHandler
                 tuft = windangles(i);
                 neighbours= data(i,(sz(2)-3):sz(2));
                 for j = 1:4
-                    neighbour = windangles(neighbours(j));
-                    neighbours(j) = abs(cos((tuft - neighbour)))*firstPrediction(neighbours(j));
+                    if neighbours(j)~=0
+                        neighbour = windangles(neighbours(j));
+                        neighbours(j) = abs(cos((tuft - neighbour)))*firstPrediction(neighbours(j));
+                    else
+                        if j==1
+                            neighbours(j)=1;
+                        else
+                           neighbours(j)=mean(neighbours(1:j-1));
+                        end                        
+                    end
                 end
                 data(i,sz(2)-3) = mean(neighbours(1:4));
                 data(i,(sz(2)-2):sz(2)) = 0;
