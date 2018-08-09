@@ -1,7 +1,6 @@
 classdef LearningHandler
     properties
     end
-    methods
     methods (Access = public)
         function this = LearningHandler()
             fprintf ("learning handler initialized\n");
