@@ -1,5 +1,5 @@
 OriginalVideo=VideoReader('christ.mov.MOV');
-weightVector=[0,0,1,1,1,1];
+weightVector=[0,0,0.25,0.25,0.25,0.25];
 name=OriginalVideo.Name;
 numberOfFrames=round((length(dir)-3)/2);
 counter=1; i=1;
