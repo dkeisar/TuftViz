@@ -6,7 +6,7 @@ WindAngle=imageTune.FlowAngle;
 %%
 for img=1:noOfImages %for each frame
     %% choose rand image then segment and tune it
-    [bw,labeled,I] = segmentrandframe(imageTune);
+    [bw,labeled,I,randnum] = segmentrandframe(imageTune);
     
     %% Create the training set
     % create tuft set
@@ -64,7 +64,8 @@ for img=1:noOfImages %for each frame
         tuftVectors=[tuftVectors;tuftMat];
     end
     %%
-    
+    save_labeled_data(imageTune,randnum,tuftSet,tuftLabel)
+
     %deletenPoints=[];
     graindata = regionprops(labeled,'basic');
     %     uiwait(gcf)

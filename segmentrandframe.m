@@ -1,8 +1,9 @@
-function [bw,labeled,I] = segmentrandframe(imageTune)
+function [bw,labeled,I,randnum] = segmentrandframe(imageTune)
 %% tune the image and segment it
     %devide into frames and read them
+    randnum=rand(1);
     I = read(imageTune.OriginalVideo, ...
-        round(rand(1)*imageTune.OriginalVideo.NumberOfFrames));%read random frame
+        round(randnum*imageTune.OriginalVideo.NumberOfFrames));%read random frame
     %make the frame B&W, crop and mask
     I=rgb2gray(I);
     I(imageTune.Mask)=256;

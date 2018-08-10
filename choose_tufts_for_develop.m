@@ -456,7 +456,7 @@ for i=1:length(MLhandel.selectedFeatures)
 end
 updatedWeightVector = fmin_adam(@(weightVector)labelingMSEGradients...
     (weightVector, MLhandel.tuftVectors(:,selectedFeaturevector), MLhandel.labels(:,2)), ...
-    handles.weightVector(:,selectedFeaturevector)', 0.01);
+    MLhandel.WeightVector(:,selectedFeaturevector)', 0.01);
 updatedWeightVector=updatedWeightVector';
 counter=1;
 for i=1:length(MLhandel.selectedFeatures)
