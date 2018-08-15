@@ -49,7 +49,7 @@ end
 
 % --- Executes just before create_grid_for_clustering is made visible.
 function create_grid_for_clustering_OpeningFcn(hObject, ~, ...
-    handles,I,bw,labeled,CroppedMask,flag)
+    handles,I,bw,labeled,imageTune,flag)
 % This function has no output args, see OutputFcn.
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -59,12 +59,15 @@ axes(handles.Image);
 imagesc((bw))
 alpha 0.2
 hold off
+handles.labeled=labeled;
 graindata = regionprops(labeled,'basic');
 handles.NoOfMaxClusters_Slider.Max=length(graindata)/3;
 handles.bw=bw;
 handles.graindata=graindata;
 handles.flag=flag;
-handles.CroppedMask=CroppedMask;
+handles.CroppedMask=imageTune.CroppedMask;
+handles.I=I;
+handles.imageTune=imageTune;
 global MLhandel
 if isfield(MLhandel,'selectedFeatures')
     handles.x_location_box.Value=MLhandel.selectedFeatures(1);
@@ -342,7 +345,7 @@ if handles.flag
         ,handles.CroppedMask,handles.bw,1);
     MLhandel.WeightVector=uupdatedWeightVector;
 else
-    [trainingSet,tuftLabels] = clusterStepOne(handles.bw,handles.labeled,handles.I,flag);
+    [trainingSet,tuftLabels] = clusterStepOne(handles.bw,handles.labeled,handles.I,handles.imageTune,handles.flag);
     [Q] = contourmap_drawer_ML(trainingSet,tuftLabels...
         ,handles.CroppedMask,handles.bw,1);
 end

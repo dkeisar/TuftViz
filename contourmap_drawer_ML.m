@@ -37,23 +37,25 @@ Q = griddata(x,y,Lables,X,Y,'v4');
 % Q = Q(X,Y);
 
 %% Filters
-if min(min(Q))<0
-    Q=Q-min(min(Q));
-end
-if max(max(Q))>1
-    Q=Q/max(max(Q)); 
-end
+% if min(min(Q))<0
+%     Q=Q-min(min(Q));
+% end
+% if max(max(Q))>1
+%     Q=Q/max(max(Q)); 
+% end
+Q=rescale(Q,0,1);
+
 Q=Q.^3; %inensefy the image -<shold be chossen by the user
 
 
-if min(min(Q))<0
-    Q=Q-min(min(Q));
-end
-if max(max(Q))>1
-    Q=Q/max(max(Q)); 
-end
+% if min(min(Q))<0
+%     Q=Q-min(min(Q));
+% end
+% if max(max(Q))>1
+%     Q=Q/max(max(Q)); 
+% end
 %Q= filter2([ 1 0],Q,'full')
-windowSize = round(min(h,l)/8);
+windowSize = round(min(h,l)/5);
 b = (1/windowSize)*ones(1,windowSize);
 a = 1;
 % %Q = filter(b,a,Q);
@@ -66,12 +68,13 @@ zi=(1/windowSize)*ones(1,windowSize-1);
 
 %% normalize Q between 0 and 1
 
-if min(min(Q))<0
-    Q=Q-min(min(Q));
-end
-if max(max(Q))>1
-    Q=Q/max(max(Q)); 
-end
+% if min(min(Q))<0
+%     Q=Q-min(min(Q));
+% end
+% if max(max(Q))>1
+%     Q=Q/max(max(Q)); 
+% end
+Q=rescale(Q,0,1);
 
 %% Crop map
 B = flipud(CroppedMask);

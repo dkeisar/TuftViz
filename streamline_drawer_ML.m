@@ -18,8 +18,8 @@ d = uiprogressdlg(f,'Title','Computing',...
 % u and v are just the diraction of the labled tufts
 len=length(tuftSet);
 [h,l]=size(bw);
-x=zeros(len,1);y=zeros(len,1);Orientation=zeros(len,1);     %initialize
-u=zeros(len,1);v=zeros(len,1);                              %initialize
+x=zeros(len+4,1);y=zeros(len+4,1);Orientation=zeros(len,1);     %initialize
+u=zeros(len+4,1);v=zeros(len+4,1);                              %initialize
 for i=1:len
     angle(i)=tuftSet(i).edgeRelatedrealAngle;
     if angle(i)>=0

@@ -1,57 +1,44 @@
-function [tuftSet,labeledTufts] = clusterStepOne(bw,labeled,I, useUnsupervised)
+function [tuftSet,labeledTufts] = clusterStepOne(bw,labeled,I,imageTune,useHybryd)
 WindAngle=imageTune.FlowAngle;
 %% main clustering func
-    %% choose rand image then segment and tune it
-    [h,l]=size(bw);
-    [tuftSet,xcenter,ycenter,graindata]=create_tuft_set(labeled,bw,WindAngle);
-    
-    global MLhandel
-    global minNumInCluster
-    global featureSelected
-    %clusterGrid=[];
-    %graindata = regionprops(labeled,'basic');
-    %create_grid_for_clustering(I,bw,graindata)
-    %     uiwait(gcf)
+%% choose rand image then segment and tune it
+WindAngle=deg2rad(WindAngle);
+[h,l]=size(bw);
+[tuftSet,xcenter,ycenter,graindata]=create_tuft_set(labeled,bw,WindAngle);
+
+global MLhandel
+%clusterGrid=[];
+%graindata = regionprops(labeled,'basic');
+%create_grid_for_clustering(I,bw,graindata)
+%     uiwait(gcf)
+try
     gridedindex = MLhandel.clusterGrid.gridindex;
-    [gridedimage] = creatgridfromdata(graindata,gridedindex);
-    [trainingSet] = buildGridTrainingSet(gridedimage, tuftSet, h, l);
-    %clusterGrid=[];
-    
-    labelDistanceFactor = 4;
-    [labeledTufts] = calcCluster(trainingSet,h,l, MLhandel.noMaxClusters, labelDistanceFactor, useUnsupervised);
-    
-    %%
-    
-    
+catch
+    load('clusterGrid_for_christ_mov.mat')
+    gridedindex=clusterGrid.gridindex;
 end
-
-function [trainingSet] = buildGridTrainingSet(gridedTufts, tuftSet, h, l)
-    trainingSetSize = size(gridedTufts);
-    trainingSet = zeros(trainingSetSize(1), trainingSetSize(2));
-    for i = 1:trainingSetSize(1)
-        for j = 1:trainingSetSize(2)
-            [data, valid] = getTuftDataByCentroid(tuftSet, gridedTufts(i,j), h, l);
-            if(valid)
-                trainingSet(i,j) = data;
-            end
+[gridedTufts] = creatgridfromdata(graindata,gridedindex);
+%%buildGridTrainingSet
+trainingSetSize = size(gridedTufts);
+trainingSet = zeros(trainingSetSize(1), trainingSetSize(2),10);% 1 is the lengt of the data
+for i = 1:trainingSetSize(1)
+    for j = 1:trainingSetSize(2)
+        [data, valid] = getTuftDataByCentroid(tuftSet, gridedTufts(i,j), h, l,WindAngle);
+        if(valid)
+            trainingSet(i,j,:) = data;
         end
     end
 end
+%%
+%clusterGrid=[];
 
-function [tuftData, isValid] = getTuftDataByCentroid(tuftSet, centroid, h, l)
-    isValid = false;
-    tuftData=[];
-    sz = size(tuftSet);
-    for ii = 1: sz(1)
-        for jj=1:sz(2)
-            tuft = tuftSet(ii,jj);
-            if(tuft.pixelX*h == centroid(1) && tuft.pixelY*l == centroid(2))
-                tuftData = [tuft.pixelX, tuft.pixelY, tuft.windRelatedAngle,...
-                    tuft.straightness, tuft.edgeRelatedrealAngle, tuft.length,...
-                    tuft.neighbor_1, tuft.neighbor_2, tuft.neighbor_3, tuft.neighbor_4];
-                isValid = true;
-                return;
-            end
-        end
-    end
+labelDistanceFactor = 4;
+[labeledTufts] = calcCluster(trainingSet,h,l, MLhandel.noMaxCluster, labelDistanceFactor, useHybryd);
+
+%%
+
+
 end
+
+
+
