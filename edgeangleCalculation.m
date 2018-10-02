@@ -1,9 +1,9 @@
 function [Cent,edgeangle] = edgeangleCalculation(trainingSet,pixellist,Centroid...
         ,MajorAxisLength,Orientations,WindAngle,i)
 	%%find edge angle
-    %p = interp1(pixellist(i).PixelList(:,1),pixellist(i).PixelList(:,2),'spline','pp');
+    p = polyfit(pixellist(i).PixelList(:,1),pixellist(i).PixelList(:,2), 7);
     Cent(1:2)=Centroid(i).Centroid;
-    [~,m,~] = regression(pixellist(i).PixelList(:,1),pixellist(i).PixelList(:,2));
+    %[~,m,~] = regression(pixellist(i).PixelList(:,1),pixellist(i).PixelList(:,2));
     
     
     %for regular tafts
@@ -13,10 +13,10 @@ function [Cent,edgeangle] = edgeangleCalculation(trainingSet,pixellist,Centroid.
     % for tufts with doted sticker
     %[~,ind]=max(pdist2([Cent(i,1),Cent(i,2)],pixellist(i).PixelList(:,1:2)));
     
-    %k = polyder(p);
-    %ytag = polyval(k,pixellist(i).PixelList(ind,1));
-    %edgeangle=rad2deg(atan(ytag));
-    edgeangle = rad2deg(atan(m(ind)));
+    k = polyder(p);
+    ytag = polyval(k,pixellist(i).PixelList(ind,1));
+    edgeangle=rad2deg(atan(ytag));
+    %edgeangle = rad2deg(atan(m(ind)));
     Orientation=Orientations(i).Orientation;
     if edgeangle<0
         edgeangle=edgeangle+360;

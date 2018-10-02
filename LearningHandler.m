@@ -36,6 +36,7 @@ classdef LearningHandler
         
         function [trainingSet,windangles] = buildTrainingSet(~, data)
             trainingSet = zeros(length(data), 10);
+            windangles = zeros(length(data), 1);
             for i=1:length(data)
                 try 
                     trainingSet(i,1) = data(i).pixelX;
@@ -52,6 +53,7 @@ classdef LearningHandler
                     windangles(i)=data(i).windRelatedAngle;
                 catch
                     trainingSet(i,3) = 0;
+                    windangles(i) = 0;
                 end
                 try 
                     trainingSet(i,4) = data(i).straightness;
