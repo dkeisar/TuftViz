@@ -49,13 +49,26 @@ for i=1:length(Orientations)
     trainingSet(i).windRelatedAngle=deg2rad((WindAngle-...
         Orientations(i).Orientation));
 end
-neighboor = upwind_neighbours(Cent,WindAngle);
+neighboor = upwind_neighbours(trainingSet,WindAngle);
 for i=1:length(xcenter)
     trainingSet(i).neighbor_1=neighboor(i,1);
     trainingSet(i).neighbor_2=neighboor(i,2);
     trainingSet(i).neighbor_3=neighboor(i,3);
     trainingSet(i).neighbor_4=neighboor(i,4);
+    figure (5)
+    hold on
+    text (trainingSet(i).pixelX,trainingSet(i).pixelY, num2str(i));
+    try  text (trainingSet(neighboor(i,1)).pixelX,trainingSet(neighboor(i,1)).pixelY, ['N1-',num2str(neighboor(i,1))]);
+    end
+    try text (trainingSet(neighboor(i,2)).pixelX,trainingSet(neighboor(i,2)).pixelY, ['N2-',num2str(neighboor(i,2))]);
+    end
+    try text (trainingSet(neighboor(i,3)).pixelX,trainingSet(neighboor(i,3)).pixelY, ['N3-',num2str(neighboor(i,3))]);
+    end
+    try text (trainingSet(neighboor(i,4)).pixelX,trainingSet(neighboor(i,4)).pixelY, ['N4-',num2str(neighboor(i,4))]);
+    end
+    hold off
 end
+
 
 % Min_Dis_1=Inf;Min_Dis_2=Inf;Min_Dis_3=Inf;Min_Dis_4=Inf;
 % for i=1:length(xcenter)

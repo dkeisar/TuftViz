@@ -22,7 +22,7 @@ function varargout = create_grid_for_clustering(varargin)
 
 % Edit the above text to modify the response to help create_grid_for_clustering
 
-% Last Modified by GUIDE v2.5 09-Aug-2018 14:25:13
+% Last Modified by GUIDE v2.5 09-Oct-2018 17:53:10
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -87,7 +87,7 @@ handles.output = hObject;
 guidata(hObject, handles);
 
 % UIWAIT makes create_grid_for_clustering wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
+% uiwait(handles.create_grid_for_clustering);
 
 
 % --- Outputs from this function are returned to the command line.
@@ -114,7 +114,7 @@ close
 counter=1;
 color=rand(1,3)
 [h,l]=size(handles.bw)
-if isfield(MLhandel,'rowNo')
+if isfield(MLhandel,'noOfCurrentRowInTheGrid')
     MLhandel.noOfCurrentRowInTheGrid=MLhandel.noOfCurrentRowInTheGrid+1;
 else
     MLhandel.noOfCurrentRowInTheGrid=1;
