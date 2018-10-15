@@ -1,30 +1,55 @@
-function updatedWeightVector = structuredPerceptron(trainingSetRaw, y_trueRaw, weightVector)
-    %trainingSet = csvread(path);
-    %fid = fopen(path);
-    %trainingSet = textscan(fid,'%s %d8 %f32','delimiter',',');
-    %fclose(fid);
-    global featureVector
+classdef structuredPerceptron
+    methods (Static)
+function updatedWeightVector = structuredPerceptronAlg(trainingSetRaw, y_trueRaw, w)
     global trainingSet
-    global w
-    featureVector = featureVectorEntry(3, 2);
+    global wCurr
+    global currNbrs
     r = 1;
-    w = zeros(featureVector.Last, 1);
-    [trainingSet, y_true] = validateLabels(trainingSetRaw, y_trueRaw);    
-    [trainingSet] = buildTrainingSet(trainingSet);
-    [topology, ~] = buildTopologyGraph();
-    for t = 1:10
-        [y_pred] = runViterbi(topology);
-        predFv = buildGlobalFv(topology, y_pred);
-        trueFv = buildGlobalFv(topology, y_true);
-        w = w + r*(trueFv - predFv);
+    [trainingSet, y_true] = structuredPerceptron.validateLabels(trainingSetRaw, y_trueRaw);    
+    [trainingSet] = structuredPerceptron.buildTrainingSet(trainingSet);
+    [topology] = structuredPerceptron.buildTopologyGraph();
+    for j = 1:4
+        wCurr = w(:,j);
+        currNbrs = trainingSet(:,6 + j);    
+        [y_pred] = structuredPerceptron.runViterbi(topology(:,j));    
+        predFv = structuredPerceptron.buildGlobalFv(topology(:,j), y_pred);
+        trueFv = structuredPerceptron.buildGlobalFv(topology(:,j), y_true);
+        w(:,j) = w(:,j) + r*(trueFv - predFv);
     end
     [updatedWeightVector] = w;
 end
 
+function [prediction] = predict(data, w)
+    global trainingSet
+    global wCurr
+    global currNbrs
+    [trainingSet] = structuredPerceptron.buildTrainingSet(data);
+    [topology] = structuredPerceptron.buildTopologyGraph();
+    y = ones(length(data),4);
+    prediction = zeros(length(data),1);
+    for i = 1:4
+        wCurr = w(:,i);
+        currNbrs = trainingSet(:,6 + i);
+        [y(:,i)] = structuredPerceptron.runViterbi(topology(:,i));
+        prediction = prediction + 0.1*(4-i+1)*y(:,i);
+    end
+    for i = 1:length(prediction)
+        curr = prediction(i);
+        if(curr > 0.7)
+            prediction(i) = 1;
+        else
+            if(curr < 0.3)
+                prediction(i) = 0;
+            else
+                prediction(i) = 0.5;
+            end
+        end
+    end
+end
+
 function [predictedLabel] = runViterbi(topology)
-    global w
-    [bestScore, bestEdges] = stepForward(topology);
-    [predictedLabel] = stepBackward(topology, bestScore, bestEdges);
+    [bestScore, bestEdges] = structuredPerceptron.stepForward(topology);
+    [predictedLabel] = structuredPerceptron.stepBackward(topology, bestScore, bestEdges);
 end
 
 function [trainingSet, labelSet] = validateLabels(trainingSetRaw, labelSetRaw)
@@ -63,7 +88,7 @@ function [trainingSet] = buildTrainingSet(data)
             trainingSet(i,2) = 0;
         end
         try 
-            trainingSet(i,3) = data(i).windRelatedAngle;
+            trainingSet(i,3) = rad2deg(data(i).windRelatedAngle);
         catch
             trainingSet(i,3) = 0;
         end
@@ -105,155 +130,49 @@ function [trainingSet] = buildTrainingSet(data)
 	end
 end
 
-function [topology, rootNodes] = buildTopologyGraph()
-    global trainingSet
-    topology = ones(length(trainingSet),1);
-    topology = topology*(-1);
-    topIndex = 1;
-    neighbours = trainingSet(:,7:8);
-    unusedIndex0 = [1:1:length(trainingSet)];
-    unusedIndex1 = [];
-    for i = 1:length(neighbours)
-        if neighbours(i,1) == 0 && neighbours(i,2) == 0
-            for j = 1:length(unusedIndex0)
-                if unusedIndex0(j) == i
-                    unusedIndex0(j) = [];
-                    rootNodes(j) = i;
-                    break;
-                end
-            end
-            topology(topIndex) = i;
-            topIndex = topIndex+1;
-            [unusedIndex0, unusedIndex1] = updateSets(unusedIndex0, unusedIndex1, neighbours, i);
-        end
-    end
-    while ~isempty(unusedIndex0) || ~isempty(unusedIndex1)
-        nodesIn = [];
-        nodesInC = 1;
-        neighbours1parnet = zeros(length(unusedIndex1), 2);
-        for i = 1:length(unusedIndex1)
-            if(nodeHasTwoParentsInTopology(unusedIndex1(i), neighbours, topology))
-                nodesIn(nodesInC) = i;
-                nodesInC = nodesInC + 1;
-            end
-            neighbours1parnet(i,:) = neighbours(unusedIndex1(i),:);
-        end
-        if(~isempty(nodesIn))
-            for i =  1:length(nodesIn)
-                j = nodesIn(i);
-                topology(topIndex) = unusedIndex1(j);
-                topIndex = topIndex + 1;
-                nodesIn(i) = unusedIndex1(j);                
-            end
-            unusedIndex1 = setdiff(unusedIndex1, topology);
-            [unusedIndex0, unusedIndex1] = updateSets(unusedIndex0, unusedIndex1, neighbours, nodesIn);
-        else
-            maxNbrs = 0;
-            nodeInd = -1;
-            complete2 = false;
-            for i = 1:length(unusedIndex1)
-                nbrs = find(neighbours1parnet == unusedIndex1(i));
-                nbrs1 = find(neighbours(:,1) == unusedIndex1(i));
-                nbrs2 = find(neighbours(:,2) == unusedIndex1(i));
-                nbrs1 = intersect(nbrs1, unusedIndex0);
-                nbrs2 = intersect(nbrs2, unusedIndex0);
-                if(length(nbrs) > maxNbrs)
-                    maxNbrs = length(nbrs);
-                    nodeInd = i;
-                    complete2 = true;
-                else
-                    if(~complete2 && length(nbrs) > 0)
-                        maxNbrs = length(nbrs);
-                        nodeInd = i;
-                        complete2 = true;
-                    else
-                        if(~complete2 && length(nbrs1) + length(nbrs2) > maxNbrs)
-                            maxNbrs = length(nbrs1) + length(nbrs2);
-                            nodeInd = i;
-                        end
-                    end
-                end
-            end
-            if(maxNbrs > 0)
-                topology(topIndex) = unusedIndex1(nodeInd);
-                topIndex = topIndex + 1;
-                unusedIndex1(nodeInd) = [];
-                [unusedIndex0, unusedIndex1] = updateSets(unusedIndex0, unusedIndex1, neighbours, topology(topIndex - 1));
-            else
-                
-            end
-        end
-    end
-end
-
-function [setAnswer1, setAnswer2] = updateSets(set1, set2, neighbours, nodes)
-    setAnswer1 = set1;
-    setAnswer2 = set2;
-    for i = 1:length(nodes)
-        node = nodes(i);
-        allIndices = union(find(neighbours(:,1) == node), find(neighbours(:,2) == node));
-        temp = intersect(allIndices, setAnswer1);
-        setAnswer2 = union(temp, setAnswer2);
-        setAnswer1 = setdiff(setAnswer1, setAnswer2);
-    end
-end
-
-function [answer] = nodeHasTwoParentsInTopology(node, neghibours, topology)
-	par1 = neghibours(node, 1);
-	par2 = neghibours(node, 2);
-    var1 = find(topology == par1);
-    var2 = find(topology == par2);
-    answer = (~isempty(var1) && ~isempty(var2)) || (~isempty(var1) && par2 == 0);
-end
-
 function [bs, be] = stepForward(topology)
     global featureVector
     global trainingSet
-    global w
+    global wCurr
+    global currNbrs
     possibleTags = [0 0.5 1];
-    bs = ones(length(topology), length(possibleTags))*(-inf); %best score seuquence
-    be = ones(length(topology), length(possibleTags))*(-1); %bestEdge
-    for i = 1:length(topology) %run on each tuft in the sequence
-        [nbrsInd] = getPreNeighbours(i, topology);
-        [nbrsSeq] = createNbrsSeq(length(nbrsInd) + 1, length(possibleTags)); %create all possible sequences
-        for j = 1:length(nbrsSeq) %run on every possible tag, calculate local representations
-            seq = nbrsSeq(j, :);
-            selfTag = seq(length(nbrsInd) + 1);
-            lfv = zeros(featureVector.Last, 1); %local feature vector
-            if(~isempty(nbrsInd)) %calculate wind related angle cosine similarity
-                ind = nbrsInd(1);
-                lfv = lfv + featureVector.createCosineSimilarityVector(trainingSet(i,3), trainingSet(ind,3), seq);
+    bs = ones(length(topology), length(possibleTags))*(-inf); %best score
+    be = ones(length(topology), length(possibleTags))*(-1); %best edge
+    for i = 1:length(topology) %run on each tuft
+        self = topology(i);
+        [nbrInd] = currNbrs(topology(i));
+        if(nbrInd == 0)
+            [allSeq] = structuredPerceptron.createNbrsSeq(1, length(possibleTags)); %create all possible sequences
+        else
+            [allSeq] = structuredPerceptron.createNbrsSeq(2, length(possibleTags)); %create all possible sequences
+        end
+        for j = 1:length(allSeq) %run on every possible tag sequence, calculate local representations
+            seq = allSeq(j, :);
+            selfTag = seq(length(seq));
+            lfv = zeros(featureVector.FullSize, 1); %local feature vector
+            if(nbrInd ~= 0) %calculate sequence score with wind related angle cosine similarity
+                wra = [trainingSet(self,3) trainingSet(nbrInd,3)];
+                entry = featureVector.calculateSeqCosineEntry(seq, wra);
+                lfv(entry) = lfv(entry) + 1;
             end
-            % calculate sequence score
-            sequenceEntryInd = featureVector.calcSequenceEntry(seq);
-            lfv(sequenceEntryInd) = lfv(sequenceEntryInd) + 1;
+            entry = featureVector.calcWindRelatedEntry(selfTag, trainingSet(self, 3));
+            lfv(entry) = lfv(entry) + 1;
+            entry = featureVector.calcStraightnessEntry(selfTag, trainingSet(self, 4));
+            lfv(entry) = lfv(entry) + 1;
             % add score of parents nodes according to sequence tag
-            curr = computeCurrScore(bs, nbrsInd, seq);
-            curr = curr + dot(lfv,w);
+            curr = 0;
+            if(nbrInd ~= 0)
+               curr = bs(nbrInd, seq(1)*2 + 1);
+            end
+            curr = curr + dot(lfv,wCurr);
             % if the score is higher then previous score for self tag then
             % replace
-            if curr > bs(i, selfTag*2 + 1)
-                bs(i, selfTag*2 + 1) = curr;
-                if(length(nbrsInd) > 0)
-                    be(i, selfTag*2 + 1) = j - 1;
+            if curr > bs(self, selfTag*2 + 1)
+                bs(self, selfTag*2 + 1) = curr;
+                if(nbrInd ~= 0)
+                    be(self, selfTag*2 + 1) = j - 1;
                 end
             end
-        end
-    end
-end
-
-function [nbrsInd] = getPreNeighbours(curr, topology)
-    global trainingSet
-    nbrstemp = trainingSet(topology(curr),7:8);
-    nbrsInd = [];
-    j = 1;
-    for i = 1:length(nbrstemp)
-        if(nbrstemp(i) ~= 0)
-            ind = find(topology == nbrstemp(i));
-            if(ind < curr)
-                nbrsInd(j) = ind;
-                j = j + 1;
-            end 
         end
     end
 end
@@ -268,14 +187,8 @@ function [nbrsSeq] = createNbrsSeq(numOfNbrs, numOfTags)
     end
 end
 
-function curr = computeCurrScore(bs, nbrsInd, currSeq)
-    curr = 0;
-    for i = 1:length(nbrsInd)
-        curr = bs(nbrsInd(i), currSeq(i)*2 + 1);
-    end
-end
-
 function [prediction] = stepBackward(topology, bestScore, bestEdges)
+    global currNbrs
     parentsPath = ones(length(topology), 2)*(-1);
     parentsPath(:,2) = -inf; 
     prediction = ones(length(topology), 1)*(-1);
@@ -286,19 +199,16 @@ function [prediction] = stepBackward(topology, bestScore, bestEdges)
             prediction(curr) = parentsPath(curr, 1);
             score = bestScore(i, (prediction(curr)*2) + 1);
         else
-            [prediction(curr),score] = getBestTagScore(bestScore(i,:));
+            [prediction(curr),score] = structuredPerceptron.getBestTagScore(bestScore(i,:));
         end
-        [nbrsInd] = getPreNeighbours(i, topology);
-        if(~isempty(nbrsInd))
-            str = dec2base(bestEdges(i, prediction(curr)*2 + 1), 3, length(nbrsInd) + 1);
+        nbr = currNbrs(curr);
+        if(nbr ~= 0)
+            str = dec2base(bestEdges(curr, prediction(curr)*2 + 1), 3, 2);
             seq = str - '0';
             seq = seq/2;
-            for j = 1:length(nbrsInd)
-                parInd = topology(nbrsInd(j));
-                if(score > parentsPath(parInd, 2))
-                    parentsPath(parInd, 1) = seq(j);
-                    parentsPath(parInd, 2) = score;
-                end
+            if(score > parentsPath(nbr, 2))
+                parentsPath(nbr, 1) = seq(1);
+                parentsPath(nbr, 2) = score;
             end
         end
     end
@@ -317,28 +227,67 @@ end
 function fv = buildGlobalFv(topology, y)
     global featureVector
     global trainingSet
-    fv = zeros(featureVector.Last, 1);
+    global currNbrs
+    fv = zeros(featureVector.FullSize, 1);
     for i = 1:length(topology)
         curr = topology(i);
-        [nbrsInd] = getPreNeighbours(i, topology);
-        seq = [];
-        if(~isempty(nbrsInd))
+        nbr = currNbrs(curr);
+        if(nbr ~= 0)
             % calculate sequence score
-            seq = ones(length(nbrsInd) + 1,1)*(-1);
-            seq(length(nbrsInd) + 1) = y(curr);
-            for j = 1:length(nbrsInd)
-                seq(j) = y(topology(nbrsInd(j)));
-            end
-            sequenceEntryInd = featureVector.calcSequenceEntry(seq);
+            seq = ones(length(nbr) + 1,1)*(-1);
+            seq(2) = y(curr);
+            seq(1) = y(nbr);
+            wra = [trainingSet(curr,3) trainingSet(nbr,3)];
+            sequenceEntryInd = featureVector.calculateSeqCosineEntry(seq, wra);
             fv(sequenceEntryInd) = fv(sequenceEntryInd) + 1;
         else
-            sequenceEntryInd = featureVector.calcSequenceEntry(y(curr));
+            sequenceEntryInd = featureVector.calcSelfTagOnly(y(curr));
             fv(sequenceEntryInd) = fv(sequenceEntryInd) + 1;            
         end
-        %calculate wind related angle cosine similarity
-        if(~isempty(nbrsInd)) 
-            ind = nbrsInd(1);
-            fv = fv + featureVector.createCosineSimilarityVector(trainingSet(i,3), trainingSet(ind,3), seq);
-        end        
+        entry = featureVector.calcWindRelatedEntry(y(curr), trainingSet(curr, 4));
+        fv(entry) = fv(entry) + 1;
+        entry = featureVector.calcStraightnessEntry(y(curr), trainingSet(curr, 4));
+        fv(entry) = fv(entry) + 1;
+        
+    end
+end
+
+function [topology] = buildTopologyGraph()
+    global trainingSet
+    n = 4;
+    topology = zeros(length(trainingSet), n);
+    for i = 1:n
+        [topology(:,i)] = structuredPerceptron.build1ParentTopology(trainingSet(:,6 + i));
+    end
+end
+
+function [topology] = build1ParentTopology(nbrs)
+    unusedIndex = 1:1:length(nbrs);
+    topology = ones(1, length(nbrs))*(-1);
+    topIndex = 1;
+    for i = 1:length(nbrs)
+        if(nbrs(i) == 0)
+            topology(topIndex) = i;
+            topIndex = topIndex + 1;
+        end
+    end
+    unusedIndex = setdiff(unusedIndex, topology);
+    while (~isempty(unusedIndex))    
+        nextInTopology = [];
+        for i = 1:topIndex
+            nextInTopology = union(nextInTopology, find(nbrs == topology(i)));
+        end
+        nextInTopology = intersect(nextInTopology, unusedIndex);
+        for i = 1:length(nextInTopology)
+            topology(topIndex) = nextInTopology(i);
+            topIndex = topIndex + 1;            
+        end
+        if(isempty(nextInTopology))
+            fprintf('oh no there is a circle.... we still have %d left to sort/n',length(unusedIndex));
+            break;
+        end
+        unusedIndex = setdiff(unusedIndex, topology);
+    end
+end
     end
 end

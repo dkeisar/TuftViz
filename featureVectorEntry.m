@@ -1,65 +1,79 @@
 classdef featureVectorEntry
-    properties (Access = public)
-        % define all combinations of label sequences
-        Sequence0
-        Sequence1
-        Sequence2
-        % define combinations of cosine similarity of 2 tufts value (labeled into 2 levels) 
-        % and if they have equal tagging
-        CosineSimilaritySeq       
-        Last
+    properties (Access = public)     
+        FullSize
         HistoryDepth
+        LabelSize
+        cosineSimseqStart
+        selfTagOnlyStart
+        windRelatedAngleStart
+        straightnessStart
     end
     methods (Access = public)
         function this = featureVectorEntry(labelSize, neighboursSize)
             fprintf ("initiating featureVector\n");
-            this.HistoryDepth = neighboursSize;
-            n = neighboursSize + 1;
-            this.Sequence0 = 1;
-            this.Sequence1 = this.Sequence0 + labelSize;
-            this.Sequence2 = this.Sequence1 + labelSize^neighboursSize;            
-            this.CosineSimilaritySeq = this.Sequence2 + labelSize^n;
-            this.Last = this.CosineSimilaritySeq + 4;
-            %this.Last = this.straightnessTagRealated + labelSize*3;
+            this.LabelSize = labelSize;
+            this.HistoryDepth = neighboursSize + 1;
+            this.cosineSimseqStart = 1;
+            this.selfTagOnlyStart = 19;
+            this.windRelatedAngleStart = 22;
+            this.straightnessStart = 28;
+            this.FullSize = 33;
         end
         
-        function [featureVector] = createCosineSimilarityVector(this, selfAngle, neighbours, tags) % array - last tag is the current
+        function entry = calculateSeqCosineEntry(this, Tags, WRAs) %WRAs - wind related Angle
             th = 0.9;
-            featureVector = zeros(this.Last, 1);
-            selfTag = tags(length(tags));
-            for i = 1:length(neighbours)
-                value = abs(cos(selfAngle - neighbours(i)));
-                if value > th && selfTag == tags(i)
-                    featureVector(this.CosineSimilaritySeq + 1) = featureVector(this.CosineSimilaritySeq + 1) + 1;                   
-                end
-                if value > th && selfTag ~= tags(i)
-                    featureVector(this.CosineSimilaritySeq + 2) = featureVector(this.CosineSimilaritySeq + 2) + 1;                    
-                end
-                if value < th && selfTag == tags(i)
-                    featureVector(this.CosineSimilaritySeq + 3) = featureVector(this.CosineSimilaritySeq + 3) + 1;                    
-                end
-                if value < th && selfTag ~= tags(i)
-                    featureVector(this.CosineSimilaritySeq + 4) = featureVector(this.CosineSimilaritySeq + 4) + 1;
-                end
+            cosValue = abs(cosd(WRAs(1) - WRAs(2)));
+            similars = 0;
+            if(cosValue >= th)
+                similars = 1;                
             end
+            entry = this.tagSeqToNum(Tags) + 9*similars;                        
         end
         
-        function index = calcSequenceEntry(this, sequence)
-            n = length(sequence);
-            if n == 1
-                index = this.Sequence0;
-            else
-                if n == 2
-                    index = this.Sequence1;
-                else
-                    index = this.Sequence2;
-                end
-            end
-            i = 1;
-            for j = n:-1:1
-                index = index + sequence(j)*2*i;
-                i = i*3;
-            end
+        function entry = calcSelfTagOnly(this, tag)
+            bias = tag*2;
+            entry = this.selfTagOnlyStart + bias;
         end
+        
+       function entry = calcWindRelatedEntry(this, tag, value)
+            th = 0.75;
+            towardWinnd = 0;
+            if(abs(cosd(value)) > th)
+                towardWinnd = this.LabelSize;
+            end
+            entry = this.windRelatedAngleStart + towardWinnd + tag*2;
+        end
+        
+        function entry = calcStraightnessEntry(this, tag, value)
+            th = 0.75;
+            striaghtness = 0;
+            if(value > th)
+                striaghtness = this.LabelSize;
+            end
+            entry = this.straightnessStart + striaghtness + tag*2;
+        end
+        
+        function [seq] = numToTagSeq(this, num)
+            val = num - 1;
+            str = dec2base(val, this.LabelSize, this.HistoryDepth);
+            seq = str - '0';
+            seq = seq/2;
+        end
+        % [0 0] -> 00 -> 1
+        % [0 0.5] -> 01 -> 2
+        % [0 1] -> 02 -> 3
+        % [0.5 0] -> 10 -> 4
+        % [0.5 0.5] -> 11 -> 5
+        function [num] = tagSeqToNum(this, tagSeq)
+            j = 1;
+            num = 0;
+            for i = length(tagSeq):-1:1
+                bit = tagSeq(i) * 2;
+                num = num + bit*j;
+                j = j*this.LabelSize;
+            end
+            num = num + 1;
+        end
+        
     end
 end
