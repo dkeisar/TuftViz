@@ -1,8 +1,10 @@
 function [Cent,edgeangle] = edgeangleCalculation(trainingSet,pixellist,Centroid...
         ,MajorAxisLength,Orientations,WindAngle,i)
 	%%find edge angle
+    warning('off','all')
     p = polyfit(pixellist(i).PixelList(:,1),pixellist(i).PixelList(:,2), 7);
     Cent(1:2)=Centroid(i).Centroid;
+    warning('on','all')
     %[~,m,~] = regression(pixellist(i).PixelList(:,1),pixellist(i).PixelList(:,2));
     
     
