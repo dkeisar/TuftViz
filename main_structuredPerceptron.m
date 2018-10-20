@@ -37,6 +37,7 @@ for t = 1:25
     fprintf('finish iteration %d\n',t)
 end
 fprintf('%d\n',weightVector)
+save learned_weight_vector.mat weightVector
 fprintf('testing:\n')
 for i = 1:length(testFrames)
     load([name,'_frame_',num2str(testFrames(i)),'_tuftSet.mat']);
