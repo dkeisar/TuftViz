@@ -127,6 +127,8 @@ end
 for i=1:length(handles.graindata)
     if ~H(round(pixelY(i)),round(pixelX(i)))
         MLhandel.gridindex(counter,MLhandel.noOfCurrentRowInTheGrid)=i;
+        MLhandel.gridindexX(counter,MLhandel.noOfCurrentRowInTheGrid)=pixelX(i);
+        MLhandel.gridindexY(counter,MLhandel.noOfCurrentRowInTheGrid)=pixelY(i);
         rect=imrect(gca,[handles.graindata(i).BoundingBox]);
         setColor(rect,[color]);
         counter=counter+1;
@@ -174,6 +176,8 @@ for i=1:length(x_point)
             for k=1:size(MLhandel.gridindex,2)
                 if MLhandel.gridindex(j,k)==index;
                     MLhandel.gridindex(j,k)=0;
+                    MLhandel.gridindexX(j,k)=0;
+                    MLhandel.gridindexY(j,k)=0;
                 end
             end
         end

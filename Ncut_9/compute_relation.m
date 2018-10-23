@@ -10,9 +10,17 @@ function [W,distances] = compute_relation(data,scale_sig,order)
 
 
 distances = zeros(length(data),length(data));
-for j = 1:length(data),
-  distances(j,:) = (sqrt((data(1,:)-data(1,j)).^2 +...
-                (data(2,:)-data(2,j)).^2));
+if size(data,1)==2
+    for j = 1:length(data)
+      distances(j,:) = (sqrt((data(1,:)-data(1,j)).^2 +...
+                    (data(2,:)-data(2,j)).^2));
+    end
+elseif size(data,1)==3
+    for j = 1:length(data)
+      distances(j,:) = sqrt((data(1,:)-data(1,j)).^2 +...
+                    (data(2,:)-data(2,j)).^2+...
+                    (data(3,:)-data(3,j)).^2);
+    end
 end
 
 % distances = X2distances(data');

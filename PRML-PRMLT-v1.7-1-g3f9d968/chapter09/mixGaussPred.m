@@ -1,4 +1,4 @@
-function [label, R] = mixGaussPred(model, X)
+function [label, R] = mixGaussPred(X,model)
 % Predict label and responsibility for Gaussian mixture model.
 % Input:
 %   X: d x n data matrix
