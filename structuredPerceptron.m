@@ -23,15 +23,22 @@ function [prediction] = predict(data, w)
     global trainingSet
     global wCurr
     global currNbrs
+    global featureVector
     [trainingSet] = structuredPerceptron.buildTrainingSet(data);
     [topology] = structuredPerceptron.buildTopologyGraph();
     y = ones(length(data),4);
     prediction = zeros(length(data),1);
+    %weights = [0.25 0.25 0.25 0.25];
+    weights = featureVector.nw;
     for i = 1:4
+        if (weights(i) == 0)
+            continue;
+        end
         wCurr = w(:,i);
         currNbrs = trainingSet(:,6 + i);
         [y(:,i)] = structuredPerceptron.runViterbi(topology(:,i));
-        prediction = prediction + 0.1*(4-i+1)*y(:,i);
+        %prediction = prediction + 0.1*(4-i+1)*y(:,i);
+        prediction = prediction + weights(i)*y(:,i);
     end
     for i = 1:length(prediction)
         curr = prediction(i);
@@ -159,6 +166,10 @@ function [bs, be] = stepForward(topology)
             lfv(entry) = lfv(entry) + 1;
             entry = featureVector.calcStraightnessEntry(selfTag, trainingSet(self, 4));
             lfv(entry) = lfv(entry) + 1;
+            entry = featureVector.calcEdgeRelatedAngleEntry(selfTag, trainingSet(self, 5));
+            lfv(entry) = lfv(entry) + 1;
+            entry = featureVector.calcLengthEntry(selfTag, trainingSet(self, 6));
+            lfv(entry) = lfv(entry) + 1;
             % add score of parents nodes according to sequence tag
             curr = 0;
             if(nbrInd ~= 0)
@@ -244,11 +255,14 @@ function fv = buildGlobalFv(topology, y)
             sequenceEntryInd = featureVector.calcSelfTagOnly(y(curr));
             fv(sequenceEntryInd) = fv(sequenceEntryInd) + 1;            
         end
-        entry = featureVector.calcWindRelatedEntry(y(curr), trainingSet(curr, 4));
+        entry = featureVector.calcWindRelatedEntry(y(curr), trainingSet(curr, 3));
         fv(entry) = fv(entry) + 1;
         entry = featureVector.calcStraightnessEntry(y(curr), trainingSet(curr, 4));
         fv(entry) = fv(entry) + 1;
-        
+        entry = featureVector.calcEdgeRelatedAngleEntry(y(curr), trainingSet(curr, 5));
+        fv(entry) = fv(entry) + 1;
+        entry = featureVector.calcLengthEntry(y(curr), trainingSet(curr, 6));
+        fv(entry) = fv(entry) + 1;     
     end
 end
 
