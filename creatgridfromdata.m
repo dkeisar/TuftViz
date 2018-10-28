@@ -10,7 +10,7 @@ stdX=0; stdY=0;
         stdX=[stdX,std(X)];stdY=[stdY,std(Y)];
     end
     stdX=mean(stdX);stdY=mean(stdY);
-    if stdY<stdX
+    if stdY>stdX
         for i=1:size(gridedindex,1)
             for j=1:size(gridedindex,2)
                 try gridedimage(j,i).X=graindata(gridedindex(i,j)).Centroid(1);

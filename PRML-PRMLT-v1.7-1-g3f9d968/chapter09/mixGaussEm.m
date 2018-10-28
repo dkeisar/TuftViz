@@ -9,7 +9,7 @@ function [label, model, llh] = mixGaussEm(X, init)
 %   llh: loglikelihood
 % Written by Mo Chen (sth4nth@gmail.com).
 %% init
-fprintf('EM for Gaussian mixture: running ... \n');
+%fprintf('EM for Gaussian mixture: running ... \n');
 tol = 1e-6;
 maxiter = 500;
 llh = -inf(1,maxiter);

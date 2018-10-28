@@ -46,8 +46,8 @@ for i=1:length(xcenter)
     trainingSet(i).edgeRelatedAngle=abs(cos(deg2rad(WindAngle-trainingSet(i).edgeRelatedrealAngle)));
 end
 for i=1:length(Orientations)
-    trainingSet(i).windRelatedAngle=deg2rad((WindAngle-...
-        Orientations(i).Orientation));
+    trainingSet(i).windRelatedAngle=abs(cos(deg2rad((WindAngle-...
+        Orientations(i).Orientation))));
 end
 neighboor = upwind_neighbours(trainingSet,WindAngle);
 for i=1:length(xcenter)
