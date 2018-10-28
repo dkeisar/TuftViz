@@ -7,6 +7,15 @@ classdef featureVectorEntry
         selfTagOnlyStart
         windRelatedAngleStart
         straightnessStart
+        edgeRelatedAngleStart
+        lengthStart
+        %th
+        cs = 0.92;
+        wr = 0.77;
+        s = 0.79;
+        er = 0.93;
+        l = 0.95;
+        nw = [0.25 0.25 0.25 0.25];
     end
     methods (Access = public)
         function this = featureVectorEntry(labelSize, neighboursSize)
@@ -17,11 +26,13 @@ classdef featureVectorEntry
             this.selfTagOnlyStart = 19;
             this.windRelatedAngleStart = 22;
             this.straightnessStart = 28;
-            this.FullSize = 33;
+            this.edgeRelatedAngleStart = 34;
+            this.lengthStart = 40;
+            this.FullSize = 45;
         end
         
         function entry = calculateSeqCosineEntry(this, Tags, WRAs) %WRAs - wind related Angle
-            th = 0.9;
+            th = this.cs;
             cosValue = abs(cosd(WRAs(1) - WRAs(2)));
             similars = 0;
             if(cosValue >= th)
@@ -36,7 +47,7 @@ classdef featureVectorEntry
         end
         
        function entry = calcWindRelatedEntry(this, tag, value)
-            th = 0.75;
+            th = this.wr;
             towardWinnd = 0;
             if(abs(cosd(value)) > th)
                 towardWinnd = this.LabelSize;
@@ -45,12 +56,30 @@ classdef featureVectorEntry
         end
         
         function entry = calcStraightnessEntry(this, tag, value)
-            th = 0.75;
+            th = this.s;
             striaghtness = 0;
             if(value > th)
                 striaghtness = this.LabelSize;
             end
             entry = this.straightnessStart + striaghtness + tag*2;
+        end
+        
+        function entry = calcEdgeRelatedAngleEntry(this, tag, value)
+            th = this.er;
+            era = 0;
+            if(value > th)
+                era = this.LabelSize;
+            end
+            entry = this.edgeRelatedAngleStart + era + tag*2;
+        end
+        
+        function entry = calcLengthEntry(this, tag, value)
+            th = this.l;
+            le = 0;
+            if(value > th)
+                le = this.LabelSize;
+            end
+            entry = this.lengthStart + le + tag*2;
         end
         
         function [seq] = numToTagSeq(this, num)
